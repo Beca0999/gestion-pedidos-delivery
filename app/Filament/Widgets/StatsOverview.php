@@ -10,8 +10,8 @@ class StatsOverview extends BaseWidget
     protected function getStats(): array
     {
         return [
-            Stat::make('Ventas Totales', '$' . number_format(Order::where('status', 'Entregado')->sum('total'), 2))
-                ->description('Dinero recaudado de pedidos entregados')
+            Stat::make('Ventas Totales (Hoy)', '$' . number_format(Order::whereDate('created_at', today())->sum('total'), 2))
+                ->description('Monto total de todos los pedidos de hoy')
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('success'),
             Stat::make('Pedidos Pendientes', Order::where('status', 'Pendiente')->count())
