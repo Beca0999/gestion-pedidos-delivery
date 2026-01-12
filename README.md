@@ -1,18 +1,21 @@
 # RUNNING 🚀 - Delivery System
 
-Sistema de gestión de pedidos en tiempo real. 
+Sistema integral de delivery con seguimiento GPS, pagos integrados y gestión logística.
 
-## 📖 Documentación
-Para empezar a usar el proyecto, por favor revisa nuestras guías detalladas:
+## 📖 Documentación Completa
+Selecciona la guía que necesites consultar:
 
-* [**Guía de Instalación Paso a Paso**](docs/INSTALL.md) ⬅️ Haz clic aquí
-* [Configuración de Mercado Pago](docs/INSTALL.md#2-variables-de-entorno)
-* [Uso del Panel de Repartidores](docs/INSTALL.md#4-crear-usuario-administrador)
+1. 🛠️ [**Guía de Instalación Técnica**](docs/INSTALL.md) - Para desarrolladores.
+2. 💳 [**Configuración de Pagos**](docs/PAGOS.md) - Cómo conectar Mercado Pago.
+3. 👥 [**Manual de Roles y Uso**](docs/ROLES.md) - Cómo opera el Admin y el Repartidor.
 
-## 📱 Vistas del Proyecto
-* **Cliente:** Interfaz moderna con bolsa naranja y rastreo por cohete.
-* **Repartidor:** Panel optimizado para móviles con GPS.
-* **Admin:** Control total de negocios, productos y asignaciones.
+## 🚀 Flujo de Trabajo
+
+
+1. **Cliente:** Realiza pedido y fija su ubicación GPS.
+2. **Admin:** Recibe notificación, prepara y asigna a un Repartidor.
+3. **Repartidor:** Recibe el pedido en su panel móvil, navega con el mapa y entrega.
+4. **Final:** El sistema cierra el ciclo y genera el ticket de venta.
 
 ---
-Desarrollado con ❤️ para Running Delivery.
+Desarrollado para la máxima velocidad. 🚀
