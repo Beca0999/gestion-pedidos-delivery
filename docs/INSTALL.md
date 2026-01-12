@@ -33,7 +33,7 @@ MP_ACCESS_TOKEN=tu_token_aqui
 ### 3. Base de Datos
 ```bash
 touch database/database.sqlite
-php artisan migrate --seed
+php artisan migrate:fresh --seed
 ```
 
 ### 4. Crear Usuario Administrador
