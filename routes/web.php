@@ -1,15 +1,13 @@
 <?php
-use App\Livewire\QuickOrder;
+
 use Illuminate\Support\Facades\Route;
+use App\Livewire\QuickOrder;
+use App\Livewire\OrderTracking;
+
+// Página principal del cliente
 Route::get('/', QuickOrder::class);
 
-use App\Models\Order;
-
-Route::get('/order/{order}/print', function (Order $order) {
-    return view('print-order', compact('order'));
-})->name('order.print');
-
-Route::get('/track/{code}', function ($code) {
-    $order = Order::where('tracking_code', $code)->firstOrFail();
-    return view('track-order', compact('order'));
-})->name('order.track');
+// Página de rastreo para el cliente
+Route::get('/rastreo/{id}', OrderTracking::class)->name('order.tracking');
+use App\Livewire\RiderPanel;
+Route::get('/rider', RiderPanel::class);
