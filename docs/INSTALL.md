@@ -6,7 +6,7 @@ Esta guía te ayudará a configurar **Running 🚀** paso a paso.
 * PHP 8.1 o superior
 * Composer
 * Node.js & NPM
-* SQLite (o MySQL si prefieres)
+* SQLite 
 
 ## Pasos Técnicos
 
