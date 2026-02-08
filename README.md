@@ -34,4 +34,4 @@ Para la puesta en marcha y operación, consulta las siguientes guías:
 * **Repartidores:** `/rider`
 
 ---
-Desarrollado para la máxima agilidad operativa. 🚀
+

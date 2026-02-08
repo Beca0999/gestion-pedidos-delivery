@@ -1,0 +1,14 @@
+[phases.setup]
+nixPkgs = ["php83", "php83Extensions.intl", "php83Extensions.zip", "php83Extensions.bcmath", "php83Extensions.pdo_sqlite", "nodejs_20"]
+
+[phases.install]
+cmds = ["composer install --ignore-platform-reqs", "npm ci"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[variables]
+DOCUMENT_ROOT = "public"
+
+[phases.start]
+cmd = "php artisan serve --host 0.0.0.0 --port ${PORT:-8080}"
