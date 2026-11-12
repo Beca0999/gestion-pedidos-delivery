@@ -3,11 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Business extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['name', 'image', 'user_id', 'delivery_price', 'phone', 'is_open', 'open_at', 'close_at'];
 
     // Esta función revisa la hora actual vs el horario del negocio
@@ -20,4 +23,5 @@ class Business extends Model
 
     public function owner(): BelongsTo { return $this->belongsTo(User::class, 'user_id'); }
     public function products(): HasMany { return $this->hasMany(Product::class); }
+    public function orders(): HasMany { return $this->hasMany(Order::class); }
 }

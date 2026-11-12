@@ -15,9 +15,14 @@ class RiderResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-truck';
     protected static ?string $navigationLabel = 'Repartidores';
 
-    public static function shouldRegisterNavigation(): bool 
-    { 
-        return auth()->check() && auth()->id() === 1; 
+    public static function canViewAny(): bool
+    {
+        return auth()->user()?->hasRole('admin') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return static::canViewAny();
     }
 
     public static function form(Forms\Form $form): Forms\Form
@@ -26,7 +31,7 @@ class RiderResource extends Resource
             Forms\Components\TextInput::make('name')->required(),
             Forms\Components\TextInput::make('phone')->tel()->required(),
             Forms\Components\Select::make('user_id')
-                ->options(User::all()->pluck('name', 'id'))
+                ->options(User::where('role', 'rider')->orderBy('name')->pluck('name', 'id'))
                 ->required(),
         ]);
     }

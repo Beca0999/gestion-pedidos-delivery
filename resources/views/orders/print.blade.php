@@ -40,7 +40,7 @@
     <div class="divider"></div>
     <div class="text-center">
         <p>¡Gracias por tu compra!</p>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data={{ urlencode(route('order.tracking', $order->tracking_code)) }}" />
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data={{ urlencode(route('order.tracking', $order->id)) }}" />
         <p style="font-size:10px">Escanea para rastrear</p>
     </div>
 </body>

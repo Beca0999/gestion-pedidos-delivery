@@ -3,21 +3,21 @@ namespace App\Policies;
 
 use App\Models\User;
 use App\Models\Order;
-use App\Models\Rider;
 
 class OrderPolicy {
-    public function viewAny(User $user): bool { return true; }
+    public function viewAny(User $user): bool { return $user->hasRole(['admin', 'owner']); }
 
     public function create(User $user): bool {
-        // Un repartidor no puede crear órdenes manualmente
-        return !Rider::where('user_id', $user->id)->exists();
+        return $user->hasRole(['admin', 'owner']);
     }
 
     public function update(User $user, Order $order): bool {
-        return true; // Permitimos update para que cambie el estado a 'Entregado'
+        return $user->hasRole('admin')
+            || ($user->hasRole('owner') && $order->business?->user_id === $user->id)
+            || ($user->hasRole('rider') && $order->rider?->user_id === $user->id);
     }
 
     public function delete(User $user, Order $order): bool {
-        return $user->id === 1; // Solo el admin borra registros
+        return $user->hasRole('admin');
     }
 }

@@ -1,4 +1,4 @@
-<div class="max-w-md mx-auto bg-white shadow-2xl rounded-[2rem] overflow-hidden mt-10 p-8 border border-gray-100">
+<div class="max-w-3xl mx-auto bg-white shadow-2xl rounded-[2rem] overflow-hidden mt-10 p-8 border border-gray-100" wire:poll.10s="refreshRiderLocation">
     <div class="text-center mb-10">
         <span class="bg-orange-100 text-orange-600 text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest">Estado del Pedido</span>
         <h2 class="text-3xl font-black text-gray-900 mt-3">#{{ $order->id }}</h2>
@@ -47,6 +47,46 @@
         </div>
     </div>
 
+    <section class="mb-6 rounded-3xl border border-gray-100 bg-white p-4">
+        <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <div>
+                <h3 class="font-black text-gray-900">Mapa del pedido</h3>
+                <p class="text-sm text-gray-500">El punto naranja es el GPS reciente del repartidor; el azul es tu destino.</p>
+            </div>
+            @if($riderLocationIsRecent)
+                <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-800">GPS actualizado</span>
+            @else
+                <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">Sin GPS reciente</span>
+            @endif
+        </div>
+        <div id="order-tracking-map" wire:ignore class="h-72 rounded-2xl"></div>
+        <p id="order-tracking-map-status" class="mt-2 text-sm text-gray-600" aria-live="polite">
+            @if(is_null($order->delivery_latitude) || is_null($order->delivery_longitude))
+                Este pedido no tiene un punto de entrega guardado.
+            @elseif(!$riderLocationIsRecent)
+                El mapa muestra el destino. El repartidor debe activar “Compartir GPS” desde su panel para mostrar su ubicación.
+            @endif
+        </p>
+    </section>
+
+    @if($recommendedBusinesses->isNotEmpty())
+        <section class="mb-6 rounded-3xl border border-orange-100 bg-orange-50 p-6">
+            <h3 class="mb-3 text-lg font-black uppercase italic text-orange-700">
+                {{ $recommendationTitle }}
+            </h3>
+            <div class="space-y-2">
+                @foreach($recommendedBusinesses as $recommendedBusiness)
+                    <a href="{{ route('business.menu', $recommendedBusiness) }}"
+                       class="flex items-center justify-between rounded-xl bg-white p-3 font-bold text-gray-800 hover:bg-orange-100">
+                        <span>{{ $recommendedBusiness->name }}</span>
+                        <span class="text-sm font-black text-orange-700">Ver menú</span>
+                    </a>
+                @endforeach
+            </div>
+
+        </section>
+    @endif
+
     <a href="/" class="flex items-center justify-center gap-2 w-full py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all active:scale-95 shadow-lg">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
@@ -54,7 +94,78 @@
         Volver a la Tienda
     </a>
 
-    <div class="mt-8 text-center" wire:poll.5s>
+    <div class="mt-8 text-center">
         <p class="text-[10px] text-gray-400 font-medium animate-pulse italic">Actualizando estado en tiempo real...</p>
     </div>
 </div>
+
+@script
+<script>
+    const trackingMapElement = document.getElementById('order-tracking-map');
+
+    if (trackingMapElement && !trackingMapElement.dataset.initialized) {
+        trackingMapElement.dataset.initialized = 'true';
+
+        const destinationValues = [
+            @json($order->delivery_latitude),
+            @json($order->delivery_longitude),
+        ];
+        const hasDestination = destinationValues[0] !== null && destinationValues[1] !== null;
+        const destination = destinationValues.map(Number);
+        let riderMarker = null;
+        const status = document.getElementById('order-tracking-map-status');
+        const map = L.map(trackingMapElement).setView(hasDestination ? destination : [20, 0], hasDestination ? 14 : 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors',
+        }).addTo(map);
+
+        if (hasDestination) {
+            L.circleMarker(destination, {
+                radius: 9,
+                color: '#1d4ed8',
+                fillColor: '#3b82f6',
+                fillOpacity: 1,
+            }).addTo(map).bindPopup('Destino de entrega');
+        }
+
+        const updateRiderMarker = (latitude, longitude, updatedAt) => {
+            if (latitude === null || longitude === null) {
+                if (riderMarker) {
+                    map.removeLayer(riderMarker);
+                    riderMarker = null;
+                }
+                status.textContent = hasDestination
+                    ? 'Se muestra el destino. El repartidor no ha compartido una ubicación GPS reciente.'
+                    : 'No hay punto de entrega ni GPS reciente del repartidor.';
+                return;
+            }
+
+            const location = [Number(latitude), Number(longitude)];
+            if (riderMarker) {
+                riderMarker.setLatLng(location);
+            } else {
+                riderMarker = L.circleMarker(location, {
+                    radius: 9,
+                    color: '#c2410c',
+                    fillColor: '#f97316',
+                    fillOpacity: 1,
+                }).addTo(map);
+            }
+            riderMarker.bindPopup('Ubicación GPS del repartidor');
+            status.textContent = `Ubicación GPS del repartidor ${updatedAt ? `actualizada ${updatedAt}` : 'recibida'}.`;
+        };
+
+        @if($riderLocationIsRecent)
+            updateRiderMarker(@json($order->rider->latitude), @json($order->rider->longitude), @json($order->rider->location_updated_at->diffForHumans()));
+        @else
+            updateRiderMarker(null, null, null);
+        @endif
+
+        Livewire.on('rider-location-updated', (event) => {
+            updateRiderMarker(event.latitude, event.longitude, event.updatedAt);
+        });
+    }
+</script>
+@endscript

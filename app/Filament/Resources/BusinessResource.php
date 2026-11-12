@@ -9,6 +9,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use App\Models\User;
 
 class BusinessResource extends Resource
 {
@@ -38,8 +40,27 @@ class BusinessResource extends Resource
                         Forms\Components\Toggle::make('is_open')
                             ->label('¿Está Abierto?')
                             ->default(true),
+                        Forms\Components\Select::make('user_id')
+                            ->label('Propietario')
+                            ->options(fn () => User::where('role', 'owner')->orderBy('name')->pluck('name', 'id'))
+                            ->visible(fn () => auth()->user()?->hasRole('admin') ?? false)
+                            ->required(fn () => auth()->user()?->hasRole('admin') ?? false),
+                        Forms\Components\Hidden::make('user_id')
+                            ->default(fn () => auth()->id())
+                            ->visible(fn () => auth()->user()?->hasRole('owner') ?? false),
                     ])->columns(2)
             ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        if (auth()->user()?->hasRole('owner')) {
+            $query->where('user_id', auth()->id());
+        }
+
+        return $query;
     }
 
     public static function table(Table $table): Table

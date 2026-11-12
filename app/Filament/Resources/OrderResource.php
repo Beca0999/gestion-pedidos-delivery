@@ -19,8 +19,7 @@ class OrderResource extends Resource
 
     public static function form(Form $form): Form
     {
-        // DETERMINAMOS SI EL USUARIO ES UN REPARTIDOR
-        $isRider = auth()->user()->rider !== null;
+        $isAdmin = auth()->user()->hasRole('admin');
 
         return $form
             ->schema([
@@ -33,13 +32,12 @@ class OrderResource extends Resource
                                 'En Camino' => 'En Camino 🛵',
                                 'Entregado' => 'Entregado ✅',
                             ])
-                            ->required()
-                            ->disabled($isRider), // EL REPARTIDOR NO EDITA EL STATUS AQUÍ
+                            ->required(),
                         
                         Forms\Components\Select::make('rider_id')
                             ->label('Asignar Repartidor')
                             ->relationship('rider', 'name')
-                            ->disabled($isRider || auth()->id() !== 1) // SOLO EL ADMIN (ID 1) ASIGNA
+                            ->disabled(! $isAdmin)
                             ->placeholder('Selecciona repartidor...'),
                     ])->columns(2),
 
@@ -70,13 +68,11 @@ class OrderResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
-        
-        // SI ES REPARTIDOR: Solo ve sus propios pedidos en la tabla
-        if (auth()->user()->rider) {
-            return $query->where('rider_id', auth()->user()->rider->id);
+
+        if (auth()->user()?->hasRole('owner')) {
+            $query->whereHas('business', fn ($businessQuery) => $businessQuery->where('user_id', auth()->id()));
         }
 
-        // SI ES DUEÑO (Admin): Ve todo para asignar
         return $query;
     }
 

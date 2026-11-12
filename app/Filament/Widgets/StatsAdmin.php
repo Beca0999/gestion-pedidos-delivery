@@ -8,7 +8,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 class StatsAdmin extends BaseWidget
 {
     public static function canView(): bool {
-        return auth()->id() === 1; // SOLO TÚ (Admin) lo ves
+        return auth()->user()?->hasRole('admin') ?? false;
     }
 
     protected function getStats(): array {

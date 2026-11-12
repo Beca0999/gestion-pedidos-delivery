@@ -3,10 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductResource\Pages;
+use App\Models\Business;
 use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,14 +20,18 @@ class ProductResource extends Resource
     protected static ?string $navigationLabel = 'Mi Menú';
  
     public static function shouldRegisterNavigation(): bool { 
-        return auth()->user()->id === 1 || auth()->user()->business !== null; 
+        $user = auth()->user();
+
+        return $user?->hasRole('admin')
+            || ($user?->hasRole('owner')
+                && Business::where('user_id', $user->id)->exists());
     }
 
     // EL CANDADO: Solo ver productos de mi negocio
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
-        if (auth()->check() && auth()->user()->id !== 1) {
+        if (auth()->check() && auth()->user()->hasRole('owner')) {
             return $query->whereHas('business', function($q) {
                 $q->where('user_id', auth()->user()->id);
             });
@@ -41,9 +47,10 @@ class ProductResource extends Resource
                 Forms\Components\TextInput::make('price')->numeric()->required()->prefix('$'),
                 Forms\Components\Select::make('business_id')
                     ->relationship('business', 'name', function (Builder $query) {
-                        // Al crear un producto, solo deja elegir el negocio del dueño
-                        if (auth()->user()->id !== 1) {
-                            return $query->where('user_id', auth()->user()->id);
+                        $user = auth()->user();
+
+                        if ($user?->hasRole('owner')) {
+                            return $query->where('user_id', $user->id);
                         }
                     })
                     ->required()
@@ -54,9 +61,14 @@ class ProductResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->groups([
+                Group::make('business.name')
+                    ->label('Negocio'),
+            ])
+            ->defaultGroup('business.name')
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label('Producto')->searchable(),
-                Tables\Columns\TextColumn::make('price')->label('Precio')->money('usd'),
+                Tables\Columns\TextColumn::make('price')->label('Precio')->money('MXN'),
                 Tables\Columns\TextColumn::make('business.name')->label('Negocio'),
             ]);
     }

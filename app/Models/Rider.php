@@ -3,12 +3,33 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Rider extends Model
 {
-    protected $fillable = ['name', 'phone', 'vehicle_type', 'is_available', 'user_id'];
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'phone',
+        'vehicle_type',
+        'is_available',
+        'user_id',
+        'latitude',
+        'longitude',
+        'location_updated_at',
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'latitude' => 'float',
+            'longitude' => 'float',
+            'location_updated_at' => 'datetime',
+        ];
+    }
 
     public function user(): BelongsTo
     {
