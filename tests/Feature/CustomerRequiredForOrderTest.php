@@ -26,8 +26,6 @@ class CustomerRequiredForOrderTest extends TestCase
             ->set('customer_name', 'Guest')
             ->set('phone', '5551234567')
             ->set('address', 'Calle de prueba')
-            ->set('deliveryLatitude', 19.432608)
-            ->set('deliveryLongitude', -99.133209)
             ->call('saveOrder')
             ->assertHasErrors(['auth'])
             ->assertSee('Crear cuenta de cliente')
@@ -48,8 +46,6 @@ class CustomerRequiredForOrderTest extends TestCase
             ->set('customer_name', 'Repartidor')
             ->set('phone', '5551234567')
             ->set('address', 'Calle de prueba')
-            ->set('deliveryLatitude', 19.432608)
-            ->set('deliveryLongitude', -99.133209)
             ->call('saveOrder')
             ->assertHasErrors(['auth'])
             ->assertSee('Esta cuenta no puede realizar pedidos');
@@ -69,14 +65,10 @@ class CustomerRequiredForOrderTest extends TestCase
             ->set('customer_name', 'Cliente sin verificar')
             ->set('phone', '5551234567')
             ->set('address', 'Calle de prueba')
-            ->set('deliveryLatitude', 19.432608)
-            ->set('deliveryLongitude', -99.133209)
             ->call('saveOrder')
             ->assertHasNoErrors();
-
         $this->assertSame(1, Order::count());
-        $this->assertEquals(19.432608, (float) Order::first()->delivery_latitude);
-        $this->assertEquals(-99.133209, (float) Order::first()->delivery_longitude);
+        $this->assertSame('Calle de prueba', Order::first()->address);
     }
 
     public function test_customer_cannot_track_another_customers_order(): void

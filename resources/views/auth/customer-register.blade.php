@@ -31,7 +31,6 @@
                     <input id="password_confirmation" name="password_confirmation" type="password" required
                         autocomplete="new-password" minlength="8" class="w-full rounded-xl border-gray-300">
                 </div>
-                <x-turnstile />
                 <button type="submit"
                     class="w-full rounded-xl bg-orange-500 px-4 py-3 font-black text-white hover:bg-orange-600">
                     Crear cuenta

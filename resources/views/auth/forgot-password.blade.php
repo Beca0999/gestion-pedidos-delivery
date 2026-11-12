@@ -18,7 +18,6 @@
                         autocomplete="email" class="w-full rounded-xl border-gray-300">
                     @error('email') <p class="mt-1 text-sm text-red-600">{{ $message }}</p> @enderror
                 </div>
-                <x-turnstile />
                 <button type="submit"
                     class="w-full rounded-xl bg-orange-500 px-4 py-3 font-black text-white hover:bg-orange-600">
                     Enviar enlace de recuperación

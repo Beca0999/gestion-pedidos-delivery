@@ -1,73 +1,56 @@
-<div class="max-w-3xl mx-auto bg-white shadow-2xl rounded-[2rem] overflow-hidden mt-10 p-8 border border-gray-100" wire:poll.10s="refreshRiderLocation">
-    <div class="text-center mb-10">
-        <span class="bg-orange-100 text-orange-600 text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest">Estado del Pedido</span>
-        <h2 class="text-3xl font-black text-gray-900 mt-3">#{{ $order->id }}</h2>
-        <p class="text-gray-500 font-medium">{{ $order->business->name }}</p>
+<div class="mx-auto mt-10 max-w-3xl overflow-hidden rounded-[2rem] border border-gray-100 bg-white p-8 shadow-2xl">
+    <div class="mb-10 text-center">
+        <span class="rounded-full bg-orange-100 px-3 py-1 text-xs font-black uppercase tracking-widest text-orange-600">Estado del Pedido</span>
+        <h2 class="mt-3 text-3xl font-black text-gray-900">#{{ $order->id }}</h2>
+        <p class="font-medium text-gray-500">{{ $order->business->name }}</p>
     </div>
 
     @php
         $steps = ['Pendiente', 'En Preparación', 'En Camino', 'Entregado'];
-        $currentStatus = $order->status;
-        $index = array_search($currentStatus, $steps);
-        $currentStep = ($index === false) ? 0 : $index;
+        $index = array_search($order->status, $steps);
+        $currentStep = $index === false ? 0 : $index;
     @endphp
 
-    <div class="relative flex justify-between items-center mb-20 px-2">
-        <div class="absolute left-0 top-5 w-full h-1 bg-gray-100 rounded-full"></div>
-        <div class="absolute left-0 top-5 h-1 bg-orange-500 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(249,115,22,0.5)]" 
+    <div class="relative mb-20 flex items-center justify-between px-2">
+        <div class="absolute left-0 top-5 h-1 w-full rounded-full bg-gray-100"></div>
+        <div class="absolute left-0 top-5 h-1 rounded-full bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.5)] transition-all duration-1000"
              style="width: {{ ($currentStep / 3) * 100 }}%"></div>
-        
-        @foreach($steps as $i => $step)
+
+        @foreach($steps as $stepIndex => $step)
             <div class="relative z-10 flex flex-col items-center">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center transition-colors duration-500 {{ $i <= $currentStep ? 'bg-orange-500 text-white shadow-lg' : 'bg-white border-4 border-gray-100 text-gray-300' }}">
-                    @if($i < $currentStep)
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                    @elseif($i == $currentStep)
-                        <div class="w-3 h-3 bg-white rounded-full animate-ping"></div>
+                <div class="flex h-10 w-10 items-center justify-center rounded-full transition-colors duration-500 {{ $stepIndex <= $currentStep ? 'bg-orange-500 text-white shadow-lg' : 'border-4 border-gray-100 bg-white text-gray-300' }}">
+                    @if($stepIndex < $currentStep)
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    @elseif($stepIndex === $currentStep)
+                        <div class="h-3 w-3 animate-ping rounded-full bg-white"></div>
                     @else
-                        <span class="text-sm font-bold">{{ $i + 1 }}</span>
+                        <span class="text-sm font-bold">{{ $stepIndex + 1 }}</span>
                     @endif
                 </div>
-                <span class="absolute top-12 text-[10px] font-black uppercase tracking-tighter w-20 text-center {{ $i <= $currentStep ? 'text-orange-600' : 'text-gray-300' }}">
+                <span class="absolute top-12 w-20 text-center text-[10px] font-black uppercase tracking-tighter {{ $stepIndex <= $currentStep ? 'text-orange-600' : 'text-gray-300' }}">
                     {{ $step }}
                 </span>
             </div>
         @endforeach
     </div>
 
-    <div class="bg-gray-50 rounded-3xl p-6 mb-6">
+    <div class="mb-6 rounded-3xl bg-gray-50 p-6">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-sm">
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm">
                 {{ $order->rider ? '🛵' : '⏳' }}
             </div>
             <div>
-                <p class="text-[10px] text-gray-400 font-bold uppercase">Repartidor asignado</p>
+                <p class="text-[10px] font-bold uppercase text-gray-400">Repartidor asignado</p>
                 <p class="font-bold text-gray-800">{{ $order->rider->name ?? 'Buscando repartidor...' }}</p>
             </div>
         </div>
-    </div>
-
-    <section class="mb-6 rounded-3xl border border-gray-100 bg-white p-4">
-        <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-            <div>
-                <h3 class="font-black text-gray-900">Mapa del pedido</h3>
-                <p class="text-sm text-gray-500">El punto naranja es el GPS reciente del repartidor; el azul es tu destino.</p>
-            </div>
-            @if($riderLocationIsRecent)
-                <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-800">GPS actualizado</span>
-            @else
-                <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">Sin GPS reciente</span>
-            @endif
+        <div class="mt-5 border-t border-gray-200 pt-4">
+            <p class="text-[10px] font-bold uppercase text-gray-400">Dirección de entrega</p>
+            <p class="mt-1 whitespace-pre-line font-medium text-gray-800">{{ $order->address }}</p>
         </div>
-        <div id="order-tracking-map" wire:ignore class="h-72 rounded-2xl"></div>
-        <p id="order-tracking-map-status" class="mt-2 text-sm text-gray-600" aria-live="polite">
-            @if(is_null($order->delivery_latitude) || is_null($order->delivery_longitude))
-                Este pedido no tiene un punto de entrega guardado.
-            @elseif(!$riderLocationIsRecent)
-                El mapa muestra el destino. El repartidor debe activar “Compartir GPS” desde su panel para mostrar su ubicación.
-            @endif
-        </p>
-    </section>
+    </div>
 
     @if($recommendedBusinesses->isNotEmpty())
         <section class="mb-6 rounded-3xl border border-orange-100 bg-orange-50 p-6">
@@ -83,89 +66,13 @@
                     </a>
                 @endforeach
             </div>
-
         </section>
     @endif
 
-    <a href="/" class="flex items-center justify-center gap-2 w-full py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all active:scale-95 shadow-lg">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <a href="/" class="flex w-full items-center justify-center gap-2 rounded-2xl bg-gray-900 py-4 font-bold text-white shadow-lg transition-all hover:bg-gray-800 active:scale-95">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
         </svg>
         Volver a la Tienda
     </a>
-
-    <div class="mt-8 text-center">
-        <p class="text-[10px] text-gray-400 font-medium animate-pulse italic">Actualizando estado en tiempo real...</p>
-    </div>
 </div>
-
-@script
-<script>
-    const trackingMapElement = document.getElementById('order-tracking-map');
-
-    if (trackingMapElement && !trackingMapElement.dataset.initialized) {
-        trackingMapElement.dataset.initialized = 'true';
-
-        const destinationValues = [
-            @json($order->delivery_latitude),
-            @json($order->delivery_longitude),
-        ];
-        const hasDestination = destinationValues[0] !== null && destinationValues[1] !== null;
-        const destination = destinationValues.map(Number);
-        let riderMarker = null;
-        const status = document.getElementById('order-tracking-map-status');
-        const map = L.map(trackingMapElement).setView(hasDestination ? destination : [20, 0], hasDestination ? 14 : 2);
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors',
-        }).addTo(map);
-
-        if (hasDestination) {
-            L.circleMarker(destination, {
-                radius: 9,
-                color: '#1d4ed8',
-                fillColor: '#3b82f6',
-                fillOpacity: 1,
-            }).addTo(map).bindPopup('Destino de entrega');
-        }
-
-        const updateRiderMarker = (latitude, longitude, updatedAt) => {
-            if (latitude === null || longitude === null) {
-                if (riderMarker) {
-                    map.removeLayer(riderMarker);
-                    riderMarker = null;
-                }
-                status.textContent = hasDestination
-                    ? 'Se muestra el destino. El repartidor no ha compartido una ubicación GPS reciente.'
-                    : 'No hay punto de entrega ni GPS reciente del repartidor.';
-                return;
-            }
-
-            const location = [Number(latitude), Number(longitude)];
-            if (riderMarker) {
-                riderMarker.setLatLng(location);
-            } else {
-                riderMarker = L.circleMarker(location, {
-                    radius: 9,
-                    color: '#c2410c',
-                    fillColor: '#f97316',
-                    fillOpacity: 1,
-                }).addTo(map);
-            }
-            riderMarker.bindPopup('Ubicación GPS del repartidor');
-            status.textContent = `Ubicación GPS del repartidor ${updatedAt ? `actualizada ${updatedAt}` : 'recibida'}.`;
-        };
-
-        @if($riderLocationIsRecent)
-            updateRiderMarker(@json($order->rider->latitude), @json($order->rider->longitude), @json($order->rider->location_updated_at->diffForHumans()));
-        @else
-            updateRiderMarker(null, null, null);
-        @endif
-
-        Livewire.on('rider-location-updated', (event) => {
-            updateRiderMarker(event.latitude, event.longitude, event.updatedAt);
-        });
-    }
-</script>
-@endscript

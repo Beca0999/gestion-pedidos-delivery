@@ -31,8 +31,6 @@ class OrderProductPersistenceTest extends TestCase
             ->set('customer_name', 'Cliente de prueba')
             ->set('phone', '5551234567')
             ->set('address', 'Calle de prueba')
-            ->set('deliveryLatitude', 19.432608)
-            ->set('deliveryLongitude', -99.133209)
             ->call('saveOrder')
             ->assertRedirect();
 

@@ -13,12 +13,11 @@ Python opcional que lee y escribe en la misma base SQLite.
 - Administración de negocios, productos y pedidos desde Filament.
 - Carrito y pedidos asociados a una cuenta de cliente.
 - Seguimiento del pedido y sugerencias de restaurantes.
-- Selección del punto de entrega en el mapa y ubicación GPS del repartidor
-  mientras tiene pedidos en camino. El repartidor debe autorizar compartir la
-  ubicación desde su dispositivo.
+- Captura de nombre, teléfono y dirección escrita en el formulario de entrega.
+- Visualización de la dirección escrita para el cliente y el repartidor.
 - Verificación y recuperación de cuenta por correo cuando se configura un
   transportista SMTP.
-- CAPTCHA Cloudflare Turnstile opcional.
+- CAPTCHA y mapas desactivados temporalmente.
 - Entrenamiento Apriori para sugerencias de productos y restaurantes. Requiere
   volver a ejecutar el entrenador cuando haya nuevos pedidos entregados.
 
@@ -109,26 +108,16 @@ credenciales son únicamente para desarrollo: no las uses en un servidor públic
 ni en producción. Si el seeder se ejecuta en una base que ya tiene esos
 usuarios, conserva las cuentas existentes.
 
-## Mapa y seguimiento GPS
+## Datos de entrega
 
-1. Inicia sesión con la cuenta de cliente, agrega productos y completa nombre,
-   teléfono y dirección.
-2. Marca el punto exacto de entrega en el mapa del formulario, o pulsa **Usar
-   mi ubicación** y permite el acceso del navegador. La ubicación destino se
-   guarda con el pedido.
-3. En `/admin`, asigna el pedido a un repartidor y actualiza su estado a **En
-   Camino**.
-4. El repartidor inicia sesión y abre **Mis entregas** (`/rider`). Debe pulsar
-   **Compartir GPS** y autorizar la ubicación. El cliente ve el GPS reciente y
-   el destino en el seguimiento del pedido.
-5. El repartidor puede pulsar **Detener** para dejar de compartir. La aplicación
-   oculta la última ubicación si tiene más de dos minutos.
+Al realizar una compra, el cliente captura su nombre, teléfono y dirección
+escrita en el formulario. La dirección se guarda con el pedido y se muestra en
+el seguimiento y en el panel del repartidor. La selección de ubicación en mapa,
+la geolocalización GPS y el CAPTCHA están desactivados temporalmente.
 
-El mapa usa Leaflet y mosaicos de OpenStreetMap desde servicios públicos, sin
-una llave de Google Maps. Se requiere conexión a internet para cargar esos
-recursos. El navegador solo permite usar GPS en un contexto seguro: `localhost`
-o una página HTTPS. Para probar desde otro dispositivo, usa una URL HTTPS
-pública; no compartas un túnel temporal con personas no autorizadas.
+Las columnas de coordenadas que ya existían en SQLite se conservan para no
+eliminar datos ni exigir una migración destructiva, pero la aplicación no las
+solicita ni las actualiza.
 
 ## Configuración de correo
 
@@ -180,35 +169,6 @@ tu aplicación. Un túnel temporal de Cloudflare puede servir para probar:
 
 La URL rápida cambia cuando reinicias el túnel y deja de funcionar al cerrarlo;
 los enlaces enviados anteriormente no se actualizan.
-
-## CAPTCHA (Cloudflare Turnstile, opcional)
-
-Turnstile está desactivado de forma predeterminada. Para activarlo:
-
-1. Inicia sesión en Cloudflare y abre la sección **Turnstile** del panel.
-2. Registra un widget para el nombre del proyecto y agrega los dominios donde
-   lo vas a probar o publicar. Para una URL temporal, autoriza el hostname del
-   túnel actual; tendrás que cambiarlo si Cloudflare asigna otro.
-3. Selecciona el modo de widget deseado y crea el widget.
-4. Copia **Site Key** y **Secret Key** en las variables indicadas abajo. La
-   Site Key se usa en la página; la Secret Key solo debe quedar en el `.env`
-   del servidor.
-5. Limpia la configuración y prueba registro, inicio de sesión o recuperación
-   de contraseña.
-
-```env
-TURNSTILE_ENABLED=true
-TURNSTILE_SITE_KEY=pega_aqui_la_site_key
-TURNSTILE_SECRET_KEY=pega_aqui_la_secret_key
-```
-
-No uses valores de ejemplo ni publiques la clave secreta. Si aún no tienes un
-widget real, deja `TURNSTILE_ENABLED=false` y ambas claves vacías. Después de
-editar el entorno, limpia la configuración:
-
-```bash
-php artisan optimize:clear
-```
 
 ## Recomendaciones Apriori
 
@@ -334,14 +294,14 @@ PYTHONPATH=python .venv/bin/python -m unittest discover -s python -p 'test_*.py'
 | `/login` | Inicio de sesión |
 | `/customer/register` | Registro de cliente |
 | `/rastreo/{id}` | Seguimiento del pedido del cliente autenticado |
-| `/rider` | Entregas y controles GPS del repartidor |
+| `/rider` | Entregas y direcciones para el repartidor |
 | `/admin` | Administración de negocios, productos y pedidos |
 
 ## Seguridad y datos locales
 
-- No compartas el archivo `.env`, claves de correo, Mercado Pago o Turnstile.
+- No compartas el archivo `.env` ni las claves de correo o Mercado Pago.
 - No publiques la contraseña de las cuentas de demostración.
 - No uses datos sintéticos ni credenciales de desarrollo como configuración de
   producción.
-- La ubicación GPS se comparte con autorización del repartidor y solo se
-  considera actual durante un periodo breve.
+- La dirección es información personal: protégela y limita su acceso a quienes
+  necesitan preparar o entregar el pedido.

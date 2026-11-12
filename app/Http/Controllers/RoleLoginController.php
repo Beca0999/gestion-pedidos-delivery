@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Rules\VerifyTurnstile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,10 +21,10 @@ class RoleLoginController extends Controller
 
     public function authenticateGeneral(Request $request): RedirectResponse
     {
-        $credentials = $request->validate(array_merge([
+        $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
-        ], VerifyTurnstile::validationRules()), VerifyTurnstile::validationMessages());
+        ]);
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
             throw ValidationException::withMessages([
@@ -42,10 +41,10 @@ class RoleLoginController extends Controller
     {
         abort_unless(in_array($role, ['rider', 'customer'], true), 404);
 
-        $credentials = $request->validate(array_merge([
+        $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
-        ], VerifyTurnstile::validationRules()), VerifyTurnstile::validationMessages());
+        ]);
 
         if (! Auth::attempt($credentials + ['role' => $role], $request->boolean('remember'))) {
             throw ValidationException::withMessages([

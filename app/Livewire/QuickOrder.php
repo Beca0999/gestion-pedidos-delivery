@@ -37,10 +37,6 @@ class QuickOrder extends Component
 
     public $address;
 
-    public $deliveryLatitude;
-
-    public $deliveryLongitude;
-
     public $email;
 
     public $payment_method = 'Efectivo';
@@ -203,8 +199,6 @@ class QuickOrder extends Component
             'customer_name' => 'required|string|max:255',
             'phone' => 'required|string|max:30',
             'address' => 'required|string|max:1000',
-            'deliveryLatitude' => 'required|numeric|between:-90,90',
-            'deliveryLongitude' => 'required|numeric|between:-180,180',
             'selectedBusiness' => 'required|integer|exists:businesses,id',
             'selectedProducts' => 'required|array|min:1',
             'payment_method' => 'required|in:Efectivo,Tarjeta',
@@ -244,8 +238,6 @@ class QuickOrder extends Component
                     'email' => auth()->user()->email,
                     'phone' => $this->phone,
                     'address' => $this->address,
-                    'delivery_latitude' => $this->deliveryLatitude,
-                    'delivery_longitude' => $this->deliveryLongitude,
                     'total' => $this->total,
                     'business_id' => $business->id,
                     'status' => 'Pendiente',

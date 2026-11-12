@@ -27,7 +27,6 @@
                     <input type="checkbox" name="remember" value="1" class="rounded border-gray-300">
                     Mantener sesión iniciada
                 </label>
-                <x-turnstile />
                 <button type="submit"
                     class="w-full rounded-xl bg-orange-500 px-4 py-3 font-black text-white hover:bg-orange-600">
                     Iniciar sesión

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Rules\VerifyTurnstile;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,9 +19,9 @@ class PasswordResetController extends Controller
 
     public function sendResetLink(Request $request): RedirectResponse
     {
-        $request->validate(array_merge([
+        $request->validate([
             'email' => ['required', 'email'],
-        ], VerifyTurnstile::validationRules()), VerifyTurnstile::validationMessages());
+        ]);
 
         Password::sendResetLink($request->only('email'));
 
@@ -42,11 +41,11 @@ class PasswordResetController extends Controller
 
     public function reset(Request $request): RedirectResponse
     {
-        $credentials = $request->validate(array_merge([
+        $credentials = $request->validate([
             'token' => ['required', 'string'],
             'email' => ['required', 'email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ], VerifyTurnstile::validationRules()), VerifyTurnstile::validationMessages());
+        ]);
 
         $status = Password::reset($credentials, function (User $user, string $password): void {
             $user->forceFill([

@@ -222,33 +222,7 @@
                     <div class="space-y-4">
                         <input wire:model="customer_name" type="text" placeholder="¿QUIÉN RECIBE?" class="w-full p-5 rounded-2xl border-none font-black text-gray-900 shadow-xl">
                         <input wire:model="phone" type="tel" placeholder="WHATSAPP" class="w-full p-5 rounded-2xl border-none font-black text-gray-900 shadow-xl">
-                        <input wire:model="address" type="text" placeholder="DIRECCIÓN" class="w-full p-5 rounded-2xl border-none font-black text-gray-900 shadow-xl">
-                        <div class="rounded-2xl bg-white p-4 text-gray-900 shadow-xl">
-                            <div class="flex flex-wrap items-center justify-between gap-3">
-                                <div>
-                                    <h3 class="font-black">Ubicación de entrega</h3>
-                                    <p class="text-sm text-gray-600">Usa tu ubicación o toca el mapa para marcar el domicilio exacto.</p>
-                                </div>
-                                <button type="button" id="use-delivery-location"
-                                        class="rounded-xl bg-orange-600 px-4 py-2 text-sm font-black text-white hover:bg-orange-700">
-                                    Usar mi ubicación
-                                </button>
-                            </div>
-                            <div id="delivery-map" wire:ignore class="mt-3 h-64 rounded-xl"></div>
-                            <p id="delivery-map-status" class="mt-2 text-sm text-gray-600" aria-live="polite">
-                                @if(!is_null($deliveryLatitude) && !is_null($deliveryLongitude))
-                                    Destino marcado: {{ number_format((float) $deliveryLatitude, 6) }}, {{ number_format((float) $deliveryLongitude, 6) }}.
-                                @else
-                                    Marca el punto de entrega en el mapa para continuar.
-                                @endif
-                            </p>
-                            @error('deliveryLatitude')
-                                <p class="mt-2 text-sm font-bold text-red-600">Marca la ubicación de entrega en el mapa.</p>
-                            @enderror
-                            @error('deliveryLongitude')
-                                <p class="mt-2 text-sm font-bold text-red-600">Marca la ubicación de entrega en el mapa.</p>
-                            @enderror
-                        </div>
+                        <textarea wire:model="address" rows="3" placeholder="DIRECCIÓN DE ENTREGA" class="w-full rounded-2xl border-none p-5 font-black text-gray-900 shadow-xl"></textarea>
                         <select wire:model="payment_method" class="w-full p-5 rounded-2xl font-black border-none text-white bg-black/30">
                             <option value="Efectivo" class="text-black uppercase">💵 EFECTIVO</option>
                             <option value="Tarjeta" class="text-black uppercase">💳 TARJETA</option>
@@ -277,73 +251,6 @@
                         @endif
                     </div>
 
-                    @script
-                    <script>
-                        const deliveryMapElement = document.getElementById('delivery-map');
-
-                        if (deliveryMapElement && !deliveryMapElement.dataset.initialized) {
-                            deliveryMapElement.dataset.initialized = 'true';
-                            const status = document.getElementById('delivery-map-status');
-                            const map = L.map(deliveryMapElement).setView([20, 0], 2);
-                            let destinationMarker = null;
-
-                            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                                maxZoom: 19,
-                                attribution: '&copy; OpenStreetMap contributors',
-                            }).addTo(map);
-
-                            const setDeliveryPoint = (latitude, longitude, zoom = 16) => {
-                                const point = [latitude, longitude];
-                                map.setView(point, zoom);
-
-                                if (destinationMarker) {
-                                    destinationMarker.setLatLng(point);
-                                } else {
-                                    destinationMarker = L.marker(point, { draggable: true }).addTo(map);
-                                    destinationMarker.on('dragend', (event) => {
-                                        const position = event.target.getLatLng();
-                                        $wire.set('deliveryLatitude', position.lat, false);
-                                        $wire.set('deliveryLongitude', position.lng, false);
-                                        status.textContent = `Destino marcado: ${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}.`;
-                                    });
-                                }
-
-                                $wire.set('deliveryLatitude', latitude, false);
-                                $wire.set('deliveryLongitude', longitude, false);
-                                status.textContent = `Destino marcado: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}.`;
-                            };
-
-                            map.on('click', (event) => setDeliveryPoint(event.latlng.lat, event.latlng.lng));
-
-                            const useLocationButton = document.getElementById('use-delivery-location');
-                            useLocationButton?.addEventListener('click', () => {
-                                if (!navigator.geolocation) {
-                                    status.textContent = 'Este navegador no permite obtener la ubicación. Puedes marcarla tocando el mapa.';
-                                    return;
-                                }
-
-                                status.textContent = 'Obteniendo ubicación del dispositivo…';
-                                navigator.geolocation.getCurrentPosition(
-                                    ({ coords }) => setDeliveryPoint(coords.latitude, coords.longitude),
-                                    () => {
-                                        status.textContent = 'No se pudo obtener la ubicación. Revisa el permiso del navegador o marca el punto en el mapa.';
-                                    },
-                                    { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 },
-                                );
-                            });
-
-                            const hasInitialPoint = $wire.deliveryLatitude !== null
-                                && $wire.deliveryLatitude !== ''
-                                && $wire.deliveryLongitude !== null
-                                && $wire.deliveryLongitude !== '';
-                            const initialLatitude = Number($wire.deliveryLatitude);
-                            const initialLongitude = Number($wire.deliveryLongitude);
-                            if (hasInitialPoint && Number.isFinite(initialLatitude) && Number.isFinite(initialLongitude)) {
-                                setDeliveryPoint(initialLatitude, initialLongitude);
-                            }
-                        }
-                    </script>
-                    @endscript
                     @endif
                 @endif
             </div>

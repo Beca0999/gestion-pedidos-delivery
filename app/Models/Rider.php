@@ -17,19 +17,7 @@ class Rider extends Model
         'vehicle_type',
         'is_available',
         'user_id',
-        'latitude',
-        'longitude',
-        'location_updated_at',
     ];
-
-    protected function casts(): array
-    {
-        return [
-            'latitude' => 'float',
-            'longitude' => 'float',
-            'location_updated_at' => 'datetime',
-        ];
-    }
 
     public function user(): BelongsTo
     {

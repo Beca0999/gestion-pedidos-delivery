@@ -38,8 +38,6 @@ class FreeDeliveryPromotionTest extends TestCase
             ->set('customer_name', $customer->name)
             ->set('phone', '5551234567')
             ->set('address', 'Calle de prueba')
-            ->set('deliveryLatitude', 19.432608)
-            ->set('deliveryLongitude', -99.133209)
             ->set('payment_method', 'Efectivo')
             ->call('saveOrder')
             ->assertHasNoErrors()

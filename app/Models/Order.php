@@ -25,8 +25,6 @@ class Order extends Model {
         'payment_method',
         'payment_status',
         'payment_id',
-        'delivery_latitude',
-        'delivery_longitude',
     ];
 
     protected static function booted() {

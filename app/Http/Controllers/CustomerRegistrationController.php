@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use App\Rules\VerifyTurnstile;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,11 +20,11 @@ class CustomerRegistrationController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validate(array_merge([
+        $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-        ], VerifyTurnstile::validationRules()), VerifyTurnstile::validationMessages());
+        ]);
 
         $user = User::create([
             'name' => $validated['name'],
